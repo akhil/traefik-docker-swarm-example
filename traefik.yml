@@ -76,6 +76,7 @@ services:
       - --certificatesresolvers.le.acme.tlschallenge=true
       # Enable the access log, with HTTP requests
       - --accesslog
+      - --log.level=DEBUG
       # Enable the Traefik log, for configurations and errors
       - --log
       # Enable the Dashboard and API

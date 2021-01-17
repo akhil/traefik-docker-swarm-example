@@ -1,0 +1,68 @@
+# Use root/example as user/password credentials
+version: '3.3'
+
+services:
+
+  db:
+    image: library/mariadb:10.5.8
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+      MYSQL_DATABASE: test
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - traefik-public
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:11.0.2
+    environment:
+      DB_VENDOR: mariadb
+      DB_ADDR: db
+      DB_DATABASE: test
+      DB_USER: test
+      DB_PASSWORD: test
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+      # Uncomment the line below if you want to specify JDBC parameters.
+      # The parameter below is just an example, and it shouldn't be used in production without knowledge.
+      # It is highly recommended that you read the MySQL JDBC driver documentation in order to use it.
+      #JDBC_PARAMS: "connectTimeout=30000"
+      JDBC_PARAMS: ssl=false
+      PROXY_ADDRESS_FORWARDING: 'true'
+      #JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
+      #command: ["-b", "0.0.0.0"]
+    ports:
+      - 8080:8080
+    deploy:
+      labels:
+          deploy:
+      labels:
+        - "traefik.enable=true"
+          #- "traefik.port=8080"
+        - "traefik.http.routers.kc-router.rule=Host(`testsso.hinduinsterest.com`)"
+        - "traefik.http.routers.kc-router.service=kc-service"
+        - "traefik.http.services.kc-service.loadbalancer.server.port=8080"
+        - "traefik.http.routers.kc-router.entrypoints.web=:80"
+        - "traefik.http.routers.kc-router.entrypoints=http"
+        #- "traefik.http.routers.kc-secured.rule=Host(`testsso.hinduinterest.com`)"
+        #- "traefik.http.routers.kc-secured.entrypoints=https"
+        #- "traefik.http.routers.kc-secured.tls.certresolver=mytlschallenge"
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+    networks:
+      - traefik-public
+    depends_on:
+      - db
+    networks:
+      - traefik-public
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  traefik-public:
+    external: true
+
