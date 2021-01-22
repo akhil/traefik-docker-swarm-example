@@ -4,7 +4,7 @@ services:
 
   traefik:
     # Use the latest v2.2.x Traefik image available
-    image: traefik:v2.3
+    image: traefik:v2.4
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
       - 80:80
@@ -61,9 +61,9 @@ services:
       # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
-      - --providers.docker.exposedbydefault=false
+      - --providers.docker.exposedbydefault=true
       # Enable Docker Swarm mode
-      - --providers.docker.swarmmode
+      - --providers.docker.swarmMode=true
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
